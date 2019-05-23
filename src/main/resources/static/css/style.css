@@ -1,0 +1,50 @@
+body {
+    background-color: #B4E2E7;
+    text-align: center;
+    font-size: 25px;
+}
+.titulo {
+    font-size: 50px;
+}
+.paso {
+    font-size: 35px;
+    color: #3B6D32;
+}
+.inputPasswd {
+    padding: 5px;
+    font-size: 25px;
+    background-color: #07C3D8;
+}
+.boton {
+    font-size: 25px;
+    background-color: #7C9092;
+    color: #F1F659;
+}
+.radioButton {
+    font-size: 25px;
+    border: 0px;
+    width: 2%;
+    height: 1em;
+}
+.mar-left {
+    margin-left: 60px;
+}
+table{
+    margin: auto;
+    font-size: 35px;
+    background-color: #07C3D8;
+    border: 1px black solid;
+}
+td {
+    width: 80px;
+    height: 80px;
+    border: 1px black solid;
+}
+.faltanLlaves {
+    width: 900px;
+    padding: 30px;
+    background-color: #BE7D48;
+    font-size: 30px;
+    font-weight: bold;
+    margin: 40px auto auto auto;
+}
