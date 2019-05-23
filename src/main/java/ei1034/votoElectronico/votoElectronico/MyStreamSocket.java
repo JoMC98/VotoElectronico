@@ -1,4 +1,4 @@
-package ei1034.votoElectronico.codigoBueno;
+package ei1034.votoElectronico.votoElectronico;
 
 import java.net.*;
 import java.io.*;

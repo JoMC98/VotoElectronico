@@ -1,4 +1,4 @@
-package ei1034.votoElectronico.codigoBueno;
+package ei1034.votoElectronico.votoElectronico;
 
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
@@ -20,7 +20,7 @@ public class AES {
 
     public AES() {
         try {
-            cifrador = Cipher.getInstance("ei1034.votoElectronico.codigoBueno.AES");
+            cifrador = Cipher.getInstance("AES");
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (NoSuchPaddingException e) {
@@ -28,19 +28,14 @@ public class AES {
         }
     }
 
-    public SecretKey generarLlave(byte[] salt) {
+    public SecretKey generarLlave(byte[] salt, String password) {
         try {
             int numeroDeIteraciones = 10000;
-
-            Scanner sc = new Scanner(System.in);
-//            System.out.println("Introduce la contrasenya: ");
-//            String password = sc.nextLine();
-            String password = "hola";
 
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, numeroDeIteraciones,64*2);
             SecretKey derivedKey = factory.generateSecret(spec);
-            SecretKey secretKey = new SecretKeySpec(derivedKey.getEncoded(), "ei1034.votoElectronico.codigoBueno.AES");
+            SecretKey secretKey = new SecretKeySpec(derivedKey.getEncoded(), "AES");
             return secretKey;
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e ) {
             e.printStackTrace();
@@ -48,45 +43,7 @@ public class AES {
         return null;
     }
 
-    private static byte[] getSalt() throws NoSuchAlgorithmException
-    {
-        SecureRandom sr = new SecureRandom();
-        byte[] salt = new byte[16];
-        sr.nextBytes(salt);
-        return salt;
-    }
-
-    public void encriptarYguardarCifrado(byte[] bytes, int ind){
-        byte[] salt = null;
-        try {
-            if (ind == 0) {
-                salt = getSalt();
-            } else {
-                try {
-                    FileInputStream fis = new FileInputStream(dirBaseSalt);
-                    int tamaño = fis.available();
-                    salt = new byte[tamaño];
-                    fis.read(salt);
-                    fis.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-
-        if (ind == 0) {
-            try {
-                FileOutputStream fos = new FileOutputStream(dirBaseSalt);
-                fos.write(salt);
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        SecretKey key = generarLlave(salt);
+    public void encriptarYguardarCifrado(byte[] bytes, int ind, SecretKey key){
         try {
             cifrador.init(Cipher.ENCRYPT_MODE, key);
         } catch (InvalidKeyException e) {
@@ -117,18 +74,7 @@ public class AES {
     }
 
     public PrivateKey leerYdesencriptarCifrado(){
-        byte[] salt = null;
-        try {
-            FileInputStream fis = new FileInputStream(dirBaseSalt);
-            int tamaño = fis.available();
-            salt = new byte[tamaño];
-            fis.read(salt);
-            fis.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        SecretKey key = generarLlave(salt);
+        SecretKey key = HomepageController.getSecretKey();
         byte[] bytes = null;
         try {
             FileInputStream fis = new FileInputStream(dirBasePrivada);
@@ -157,7 +103,7 @@ public class AES {
         PrivateKey privateKey = null;
         try {
 
-            KeyFactory keyFactory = KeyFactory.getInstance("ei1034.votoElectronico.codigoBueno.RSA");
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             KeySpec keySpec = new PKCS8EncodedKeySpec(desencriptado);
             privateKey = keyFactory.generatePrivate(keySpec);
         } catch (InvalidKeySpecException e) {
@@ -170,18 +116,7 @@ public class AES {
     }
 
     public byte[] leerYdesencriptarCadena(int indice){
-        byte[] salt = null;
-        try {
-            FileInputStream fis = new FileInputStream(dirBaseSalt);
-            int tamaño = fis.available();
-            salt = new byte[tamaño];
-            fis.read(salt);
-            fis.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        SecretKey key = generarLlave(salt);
+        SecretKey key = HomepageController.getSecretKey();
         byte[] bytes = null;
         try {
             FileInputStream fis = new FileInputStream(dirBaseCadenas + indice + ".dat");

@@ -1,5 +1,7 @@
 package ei1034.votoElectronico.codigoBueno;
 
+import ei1034.votoElectronico.votoElectronico.RSA;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

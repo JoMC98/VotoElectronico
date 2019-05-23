@@ -1,5 +1,7 @@
 package ei1034.votoElectronico.codigoBueno;
 
+import ei1034.votoElectronico.votoElectronico.RSA;
+
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -21,7 +23,7 @@ public class prueba {
 
     public static void main(String[] args) throws UnsupportedEncodingException {
         try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("ei1034.votoElectronico.codigoBueno.RSA");
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("ei1034.votoElectronico.votoElectronico.RSA");
             keyPairGenerator.initialize(2048);
             KeyPair keyPair = keyPairGenerator.genKeyPair();
 
@@ -42,23 +44,23 @@ public class prueba {
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, numeroDeIteraciones,64*2);
             SecretKey derivedKey = factory.generateSecret(spec);
-            SecretKey secretKey = new SecretKeySpec(derivedKey.getEncoded(), "ei1034.votoElectronico.codigoBueno.AES");
+            SecretKey secretKey = new SecretKeySpec(derivedKey.getEncoded(), "ei1034.votoElectronico.votoElectronico.AES");
 
 
             byte[] encriptado = null;
-            Cipher cifrador = Cipher.getInstance("ei1034.votoElectronico.codigoBueno.AES");
+            Cipher cifrador = Cipher.getInstance("ei1034.votoElectronico.votoElectronico.AES");
             cifrador.init(Cipher.ENCRYPT_MODE, secretKey);
             encriptado = cifrador.doFinal(keyPair.getPrivate().getEncoded());
 
             factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             spec = new PBEKeySpec(password.toCharArray(), salt, numeroDeIteraciones,64*2);
             derivedKey = factory.generateSecret(spec);
-            secretKey = new SecretKeySpec(derivedKey.getEncoded(), "ei1034.votoElectronico.codigoBueno.AES");
+            secretKey = new SecretKeySpec(derivedKey.getEncoded(), "ei1034.votoElectronico.votoElectronico.AES");
 
             cifrador.init(Cipher.DECRYPT_MODE, secretKey);
             byte[] desencriptado = cifrador.doFinal(encriptado);
 
-            KeyFactory keyFactory = KeyFactory.getInstance("ei1034.votoElectronico.codigoBueno.RSA");
+            KeyFactory keyFactory = KeyFactory.getInstance("ei1034.votoElectronico.votoElectronico.RSA");
             KeySpec keySpec = new PKCS8EncodedKeySpec(desencriptado);
             PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
 

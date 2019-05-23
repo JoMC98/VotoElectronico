@@ -1,4 +1,4 @@
-package ei1034.votoElectronico.codigoBueno;
+package ei1034.votoElectronico.votoElectronico;
 
 import javax.crypto.*;
 import java.io.FileInputStream;
@@ -17,7 +17,7 @@ public class RSA {
 
     public RSA() {
         try {
-            cifrador = Cipher.getInstance("ei1034.votoElectronico.codigoBueno.RSA");
+            cifrador = Cipher.getInstance("RSA");
             sign = Signature.getInstance("SHA256withRSA");
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -29,13 +29,10 @@ public class RSA {
     public PrivateKey generarLlaves(String letra) {
         final int keySize = 2048;
         try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("ei1034.votoElectronico.codigoBueno.RSA");
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("fRSA");
             keyPairGenerator.initialize(keySize);
             KeyPair keyPair = keyPairGenerator.genKeyPair();
             guardarClave(keyPair.getPublic(), "src/main/resources/claves/llavePublica" + letra + ".dat");
-
-            AES cifradorAES = new AES();
-            cifradorAES.encriptarYguardarCifrado(keyPair.getPrivate().getEncoded(), 0);
 
             return keyPair.getPrivate();
         } catch (NoSuchAlgorithmException e) {
@@ -53,7 +50,7 @@ public class RSA {
 
             fis.read(bytes);
             fis.close();
-            KeyFactory keyFactory = KeyFactory.getInstance("ei1034.votoElectronico.codigoBueno.RSA");
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             KeySpec keySpec = new X509EncodedKeySpec(bytes);
             key = keyFactory.generatePublic(keySpec);
         } catch (IOException e) {

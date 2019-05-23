@@ -1,4 +1,4 @@
-package ei1034.votoElectronico.codigoBueno;
+package ei1034.votoElectronico.votoElectronico;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -11,10 +11,11 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 class HiloServidor implements Runnable {
-   MyStreamSocket myDataSocket;
+    MyStreamSocket myDataSocket;
     private static String dirBasePublica = "src/main/resources/claves/llavePublica";
     private static String dirBaseCadenas = "src/main/resources/cadenas/r";
     private static String dirBaseEncriptados = "src/main/resources/encriptados/e";
@@ -29,6 +30,7 @@ class HiloServidor implements Runnable {
     private static AES cifradorAES;
     private static PrivateKey privateKey = null;
     private static SecureRandom sr = new SecureRandom();
+    private static DetectaAlteracion detectaAlteracion;
 
     private static List<byte[]> mensajesFase1;
     private static List<byte[]> mensajesFase2 = new ArrayList<byte[]>();
@@ -37,14 +39,22 @@ class HiloServidor implements Runnable {
     private static List<byte[]> mensajesFase4 = new ArrayList<byte[]>();
     private static List<byte[]> mensajesFase4Firmados = new ArrayList<byte[]>();
     private static List<byte[]> mensajesFase5 = new ArrayList<byte[]>();
-    private static List<String> votosFinales = new ArrayList<String>();
+    private static List<String> votosFinales;
+    private static List<String> votosFinalesProvisional = new ArrayList<String>();
     private static List<AuxiliarCliente> sockets;
 
+    private static AtomicInteger llavesRecibidas;
 
-   HiloServidor(MyStreamSocket myDataSocket, List<AuxiliarCliente> sockets, List<byte[]> mensajesFase1) {
+
+   HiloServidor(MyStreamSocket myDataSocket, List<AuxiliarCliente> sockets, List<byte[]> mensajesFase1,
+                DetectaAlteracion detectaAlteracion, List<String> votosFinales, AtomicInteger llavesRecibidas) {
        this.myDataSocket = myDataSocket;
        this.sockets = sockets;
        this.mensajesFase1 = mensajesFase1;
+       this.detectaAlteracion = detectaAlteracion;
+       this.votosFinales = votosFinales;
+       this.llavesRecibidas = llavesRecibidas;
+
        cifradorAES = new AES();
        cifrador = new RSA();
 
@@ -99,6 +109,8 @@ class HiloServidor implements Runnable {
                         m = myDataSocket.receiveMessage(longitud);
 
                         recibirLlave(m, letra);
+
+                        llavesRecibidas.getAndIncrement();
                         break;
                     //Primer envio todos a Alice (Primera fase)
                     case 1:
@@ -115,12 +127,12 @@ class HiloServidor implements Runnable {
                                     correcto = true;
                             }
                             if (!correcto) {
-                                //TODO ERROR ALTERACION
-                                System.out.println("ERROR ALTERACION fase 1");
-                            }
-                            ArrayList<byte[]> list = shuffle(mensajesFase1);
-                            for (int i=0; i<4; i++) {
-                                enviaMensaje(list.get(i), 1, 2);
+                                enviaAviso();
+                            } else {
+                                ArrayList<byte[]> list = shuffle(mensajesFase1);
+                                for (int i=0; i<4; i++) {
+                                    enviaMensaje(list.get(i), 1, 2);
+                                }
                             }
                         }
                         break;
@@ -139,15 +151,15 @@ class HiloServidor implements Runnable {
                                     correcto = true;
                             }
                             if (!correcto) {
-                                //TODO ERROR ALTERACION
-                                System.out.println("ERROR ALTERACION fase 2");
-                            }
-                            ArrayList<byte[]> list = shuffle(mensajesFase2);
-                            for (int i=0; i<4; i++) {
-                                if (myPosition == 3) {
-                                    enviaMensaje(list.get(i), 0, 3);
-                                } else {
-                                    enviaMensaje(list.get(i), myPosition + 1, 2);
+                                enviaAviso();
+                            } else {
+                                ArrayList<byte[]> list = shuffle(mensajesFase2);
+                                for (int i=0; i<4; i++) {
+                                    if (myPosition == 3) {
+                                        enviaMensaje(list.get(i), 0, 3);
+                                    } else {
+                                        enviaMensaje(list.get(i), myPosition + 1, 2);
+                                    }
                                 }
                             }
                         }
@@ -165,14 +177,13 @@ class HiloServidor implements Runnable {
                                     correcto = true;
                             }
                             if (!correcto) {
-                                //TODO ERROR ALTERACION
-                                System.out.println("ERROR ALTERACION fase 3");
-                            }
-
-                            for (int i=0; i<4; i++) {
-                                for (int j=0; j<4; j++) {
-                                    if (j != myPosition) {
-                                        enviaMensajeFirmado(mensajesFase3.get(i),mensajesFase3Firmados.get(i), j, 4);
+                                enviaAviso();
+                            } else {
+                                for (int i=0; i<4; i++) {
+                                    for (int j=0; j<4; j++) {
+                                        if (j != myPosition) {
+                                            enviaMensajeFirmado(mensajesFase3.get(i),mensajesFase3Firmados.get(i), j, 4);
+                                        }
                                     }
                                 }
                             }
@@ -195,36 +206,36 @@ class HiloServidor implements Runnable {
                         boolean correcto = cifrador.comprobarFirma(publicKey, firma, m);
 
                         if (!correcto) {
-                            //TODO ERROR ALTERACION
-                            System.out.println("ERROR ALTERACION firma fase 4");
-                        }
-
-                        if (myPosition == turno + 1 && mensajesFase4.size() == 4) {
-                            correcto = false;
-                            for (int i=0; i<4; i++) {
-                                if (desencriptar(i, 4, turno))
-                                    correcto = true;
-                            }
-                            if (!correcto) {
-                                //TODO ERROR ALTERACION
-                                System.out.println("ERROR ALTERACION fase 4");
-                            }
-                            for (int i=0; i<4; i++) {
-                                for (int j=0; j<4; j++) {
-                                    if (j != myPosition) {
-                                        if (myPosition == 3) {
-                                            enviaMensajeFirmado(mensajesFase4.get(i), mensajesFase4Firmados.get(i), j, 5);
-                                        } else {
-                                            enviaMensajeFirmado(mensajesFase4.get(i), mensajesFase4Firmados.get(i), j, 4);
-                                        }
-                                    } else {
-                                        if (myPosition == 3) {
-                                            enviaMensajeFirmado(mensajesFase4.get(i), mensajesFase4Firmados.get(i), j, 5);
+                            enviaAviso();
+                        } else {
+                            if (myPosition == turno + 1 && mensajesFase4.size() == 4) {
+                                correcto = false;
+                                for (int i=0; i<4; i++) {
+                                    if (desencriptar(i, 4, turno))
+                                        correcto = true;
+                                }
+                                if (!correcto) {
+                                    enviaAviso();
+                                } else {
+                                    for (int i=0; i<4; i++) {
+                                        for (int j=0; j<4; j++) {
+                                            if (j != myPosition) {
+                                                if (myPosition == 3) {
+                                                    enviaMensajeFirmado(mensajesFase4.get(i), mensajesFase4Firmados.get(i), j, 5);
+                                                } else {
+                                                    enviaMensajeFirmado(mensajesFase4.get(i), mensajesFase4Firmados.get(i), j, 4);
+                                                }
+                                            } else {
+                                                if (myPosition == 3) {
+                                                    enviaMensajeFirmado(mensajesFase4.get(i), mensajesFase4Firmados.get(i), j, 5);
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
+
                         break;
                     //Todos verifican y se recuentan votos
                     case 5:
@@ -242,21 +253,27 @@ class HiloServidor implements Runnable {
                         correcto = cifrador.comprobarFirma(publicKey, firma, m);
 
                         if (!correcto) {
-                            //TODO ERROR ALTERACION
-                            System.out.println("ERROR ALTERACION firma fase 5");
-                        }
-                        if (mensajesFase5.size() == 4) {
-                            correcto = false;
-                            for (int i=0; i<4; i++) {
-                                if (desencriptar(i, 5, -1))
-                                    correcto = true;
+                            enviaAviso();
+                        } else {
+                            if (mensajesFase5.size() == 4) {
+                                correcto = false;
+                                for (int i=0; i<4; i++) {
+                                    if (desencriptar(i, 5, -1))
+                                        correcto = true;
+                                }
+                                if (!correcto) {
+                                    enviaAviso();
+                                } else {
+                                    for (int i=0; i<4; i++) {
+                                        votosFinales.add(votosFinalesProvisional.get(i));
+                                    }
+                                }
                             }
-                            if (!correcto) {
-                                //TODO ERROR ALTERACION
-                                System.out.println("ERROR ALTERACION fase 5");
-                            }
-                            System.out.println(votosFinales);
+                            myDataSocket.close();
                         }
+                        break;
+                    case 6:
+                        myDataSocket.close();
                 }
             }
        }
@@ -282,6 +299,21 @@ class HiloServidor implements Runnable {
         try {
             System.out.println("SE ENVIA A " + dest + " CON IP: " + listaIps.get(dest) + " EL MENSAJE CON INDICE: " + indice);
             sockets.get(dest).enviaMensajeFirmado(m, firma, indice, myPosition);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void enviaAviso() {
+        try {
+            detectaAlteracion.nuevaAlteracion();
+            for (int i=0; i<4; i++) {
+                sockets.get(i).enviaAviso();
+            }
         } catch (SocketException e) {
             e.printStackTrace();
         } catch (UnknownHostException e) {
@@ -374,7 +406,7 @@ class HiloServidor implements Runnable {
             BigInteger cadenaExtraida = new BigInteger(vectorFinal[1]);
             desencriptado = cifradorAES.leerYdesencriptarCadena(1);
 
-            votosFinales.add(votoFinal);
+            votosFinalesProvisional.add(votoFinal);
             return comprobarCadenas(cadenaExtraida.toByteArray(), desencriptado);
         }
     }

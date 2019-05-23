@@ -1,16 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
     <head>
         <meta charset="UTF-8">
         <title>Voto Electronico</title>
     </head>
     <body>
+        <div th:if="${paso == 1}">
+            <h1><b>Paso 1: </b> Crear llaves y compartirlas</h1><br><br>
 
+            <form action="#" th:action="@{/crearLlaves}" method="post">
+                <label>Contraseña: </label>
+                <input type="password" name="password" required/>
+                <input type="submit" value="Crear" />
+            </form>
+        </div>
+        <div th:if="${paso == 2}">
+            <h1><b>Paso 2: </b> Elige tu voto</h1><br><br>
 
-        -Al iniciar, activar el servidor sockets o en un boto
-        -Boto crear llaves y enviales
-        -Radio button elegir voto y un boto pa cifralo tot
-        -Boto recuenta
-        -Boto mostrar resultados
+            <label th:if="${llavesNoRecibidas}">No se puede votar porque no se han recibido todas las llaves públicas</label>
+
+            <h2>¿Quieres que Cataluña se independize?</h2><br><br>
+
+            <form action="#" th:action="@{/votar}" method="post">
+                <input type="radio" name="eleccion" value="Si" required> Si
+                <input type="radio" name="eleccion" value="No" required> No<br><br>
+                <input type="submit" value="Accedir" />
+            </form>
+        </div>
+        <div th:if="${paso == 3}">
+            <h1><b>Paso 3: </b> Iniciar recuento</h1>
+
+            <form action="#" th:action="@{/recuento}" method="post">
+                <label>Contraseña: </label>
+                <input type="password" name="password" required/>
+                <input type="submit" value="Recuento" />
+            </form>
+        </div>
+        <div th:if="${paso == 4}">
+            <h1><b>Resultados</b></h1><br><br>
+
+            <h2>¿Quieres que Cataluña se independize?</h2><br><br>
+
+            <h3>Votos Si: <label th:text="${votosSi}"></label></h3><br>
+            <h3>Votos No: <label th:text="${votosNo}"></label></h3>
+        </div>
     </body>
 </html>

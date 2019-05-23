@@ -1,4 +1,4 @@
-package ei1034.votoElectronico.codigoBueno;
+package ei1034.votoElectronico.votoElectronico;
 
 import java.net.*;
 import java.io.*;
@@ -21,6 +21,12 @@ public class AuxiliarCliente {
 	   mySocket.sendLongitud(m);
 	   mySocket.close();	   
    }
+
+    public void enviaAviso() throws IOException {
+        String cadena = "6#0";
+        mySocket.sendLongitud(cadena);
+        mySocket.close();
+    }
 
     public void enviaMensaje(byte[] m, int indice)  throws IOException {
        String cadena = indice + "#" + m.length;

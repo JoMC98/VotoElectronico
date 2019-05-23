@@ -1,4 +1,4 @@
-package ei1034.votoElectronico.codigo;
+package ei1034.votoElectronico.codigoBueno;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
