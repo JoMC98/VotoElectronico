@@ -1,0 +1,6 @@
+.idea
+target
+*.iml
+src/main/resources/claves
+src/main/resources/cadenas
+src/main/resources/encriptados
