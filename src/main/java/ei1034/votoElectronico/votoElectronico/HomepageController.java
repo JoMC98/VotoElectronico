@@ -241,10 +241,10 @@ public class HomepageController {
     @RequestMapping(value="/votar", method = RequestMethod.POST)
     public String votar(Model model, HttpSession session, @RequestParam("eleccion") String voto) {
         if (llavesRecibidas.get() == 3) {
-            byte[] cifrado = votar(voto, secretKey);
-
-            session.setAttribute("cifrado", cifrado);
-            secretKey = null;
+//            byte[] cifrado = votar(voto, secretKey);
+//
+//            session.setAttribute("cifrado", cifrado);
+//            secretKey = null;
 
             model.addAttribute("paso", 3);
             return "index";
@@ -344,18 +344,18 @@ public class HomepageController {
 
     @RequestMapping(value="/recuento", method = RequestMethod.POST)
     public String iniciarRecuento(Model model, HttpSession session, @RequestParam("password") String password) {
-        byte[] salt = leerSalt();
-        secretKey = cifradorAES.generarLlave(salt, password);
-
-        byte[] votoOriginal = (byte[]) session.getAttribute("cifrado");
-        enviaMensaje(votoOriginal, 0, 1);
-
-        while (votosFinales.size() < 4) {
-            if (detectaAlteracion.getEstado()) {
-                return "alteracion";
-            }
-        }
-
+//        byte[] salt = leerSalt();
+//        secretKey = cifradorAES.generarLlave(salt, password);
+//
+//        byte[] votoOriginal = (byte[]) session.getAttribute("cifrado");
+//        enviaMensaje(votoOriginal, 0, 1);
+//
+//        while (votosFinales.size() < 4) {
+//            if (detectaAlteracion.getEstado()) {
+//                return "alteracion";
+//            }
+//        }
+//
         int votosSi=0;
         for (String voto: votosFinales) {
             if (voto.equals("Si")) {
@@ -418,5 +418,4 @@ public class HomepageController {
     public String recuentoGet() {
         return "redirect:/";
     }
-
 }

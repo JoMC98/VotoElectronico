@@ -32,7 +32,7 @@ public class RSA {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("fRSA");
             keyPairGenerator.initialize(keySize);
             KeyPair keyPair = keyPairGenerator.genKeyPair();
-            guardarClave(keyPair.getPublic(), "src/main/resources/claves/llavePublica" + letra + ".dat");
+            guardarClave(keyPair.getPublic(), "src/main/resources/claves/static/llavePublica" + letra + ".dat");
 
             return keyPair.getPrivate();
         } catch (NoSuchAlgorithmException e) {

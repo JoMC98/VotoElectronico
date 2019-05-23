@@ -14,9 +14,9 @@ import java.util.Scanner;
 
 public class AES {
     Cipher cifrador;
-    private static String dirBasePrivada = "src/main/resources/claves/llavePrivada.dat";
-    private static String dirBaseSalt = "src/main/resources/claves/salt.dat";
-    private static String dirBaseCadenas = "src/main/resources/cadenas/r";
+    private static String dirBasePrivada = "src/main/resources/static/claves/llavePrivada.dat";
+    private static String dirBaseSalt = "src/main/resources/static/claves/salt.dat";
+    private static String dirBaseCadenas = "src/main/resources/static/cadenas/r";
 
     public AES() {
         try {

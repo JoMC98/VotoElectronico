@@ -16,10 +16,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 class HiloServidor implements Runnable {
     MyStreamSocket myDataSocket;
-    private static String dirBasePublica = "src/main/resources/claves/llavePublica";
-    private static String dirBaseCadenas = "src/main/resources/cadenas/r";
-    private static String dirBaseEncriptados = "src/main/resources/encriptados/e";
-    private static String ficheroIps = "src/main/resources/ips.txt";
+    private static String dirBasePublica = "src/main/resources/static/claves/llavePublica";
+    private static String dirBaseEncriptados = "src/main/resources/static/encriptados/e";
+    private static String ficheroIps = "src/main/resources/static/ips.txt";
 
     private static ArrayList<String> listaIps;
     private static String myIp;
