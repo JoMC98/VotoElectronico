@@ -51,19 +51,26 @@ public class HomepageController {
 
     private static AtomicInteger llavesRecibidas;
 
+    private static boolean serverSocketCreated = false;
+
     @RequestMapping("/")
     public String index(Model model) {
-        detectaAlteracion = new DetectaAlteracion();
-        List<String> votos = new ArrayList<String>();
-        votosFinales = Collections.synchronizedList(votos);
-        llavesRecibidas = new AtomicInteger();;
+        if (!serverSocketCreated) {
+            detectaAlteracion = new DetectaAlteracion();
+            List<String> votos = new ArrayList<String>();
+            votosFinales = Collections.synchronizedList(votos);
+            llavesRecibidas = new AtomicInteger();
 
-        Thread hilo = new Thread(new HiloActivarServidor(detectaAlteracion, votosFinales, llavesRecibidas));
-        hilo.start();
+            Thread hilo = new Thread(new HiloActivarServidor(detectaAlteracion, votosFinales, llavesRecibidas));
+            hilo.start();
+
+            serverSocketCreated = true;
+        }
 
         model.addAttribute("paso", 1);
         return "index";
     }
+
 
     class HiloActivarServidor implements Runnable {
         DetectaAlteracion detectaAlteracion;
