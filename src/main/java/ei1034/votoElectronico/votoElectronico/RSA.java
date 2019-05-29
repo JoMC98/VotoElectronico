@@ -29,10 +29,10 @@ public class RSA {
     public PrivateKey generarLlaves(String letra) {
         final int keySize = 2048;
         try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("fRSA");
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
             keyPairGenerator.initialize(keySize);
             KeyPair keyPair = keyPairGenerator.genKeyPair();
-            guardarClave(keyPair.getPublic(), "src/main/resources/claves/static/llavePublica" + letra + ".dat");
+            guardarClave(keyPair.getPublic(), "src/main/resources/static/claves/llavePublica" + letra + ".dat");
 
             return keyPair.getPrivate();
         } catch (NoSuchAlgorithmException e) {

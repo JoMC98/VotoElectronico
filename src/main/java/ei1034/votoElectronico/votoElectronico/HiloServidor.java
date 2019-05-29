@@ -238,6 +238,7 @@ class HiloServidor implements Runnable {
                         break;
                     //Todos verifican y se recuentan votos
                     case 5:
+
                         turno = Integer.parseInt(v[3]);
                         longitudFirma = Integer.parseInt(v[2]);
 
@@ -268,11 +269,11 @@ class HiloServidor implements Runnable {
                                     }
                                 }
                             }
-                            myDataSocket.close();
                         }
                         break;
                     case 6:
-                        myDataSocket.close();
+                        detectaAlteracion.nuevaAlteracion();
+//                        myDataSocket.close();
                 }
             }
        }

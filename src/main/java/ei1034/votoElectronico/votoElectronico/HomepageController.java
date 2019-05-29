@@ -14,6 +14,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -57,8 +58,8 @@ public class HomepageController {
         votosFinales = Collections.synchronizedList(votos);
         llavesRecibidas = new AtomicInteger();;
 
-//        Thread hilo = new Thread(new HiloActivarServidor(detectaAlteracion, votosFinales, llavesRecibidas));
-//        hilo.start();
+        Thread hilo = new Thread(new HiloActivarServidor(detectaAlteracion, votosFinales, llavesRecibidas));
+        hilo.start();
 
         model.addAttribute("paso", 1);
         return "index";
@@ -140,12 +141,12 @@ public class HomepageController {
 
     @RequestMapping(value="/crearLlaves", method = RequestMethod.POST)
     public String crearLlaves(HttpSession session, Model model, @RequestParam("password") String password) {
-//        crearSockets();
-//        secretKey = cifradorAES.generarLlave(getSalt(), password);
-//        PrivateKey privateKey = cifrador.generarLlaves(letras[myPosition]);
-//        cifradorAES.encriptarYguardarCifrado(privateKey.getEncoded(), 0, secretKey);
-//
-//        enviarLlavesPublicas();
+        crearSockets();
+        secretKey = cifradorAES.generarLlave(getSalt(), password);
+        PrivateKey privateKey = cifrador.generarLlaves(letras[myPosition]);
+        cifradorAES.encriptarYguardarCifrado(privateKey.getEncoded(), 0, secretKey);
+
+        enviarLlavesPublicas();
 
         model.addAttribute("paso", 2);
         return "index";
@@ -156,11 +157,9 @@ public class HomepageController {
         byte[] salt = new byte[16];
         sr.nextBytes(salt);
         try {
-            FileInputStream fis = new FileInputStream(dirBaseSalt);
-            int tamaño = fis.available();
-            salt = new byte[tamaño];
-            fis.read(salt);
-            fis.close();
+            FileOutputStream fos = new FileOutputStream(dirBaseSalt);
+            fos.write(salt);
+            fos.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -239,10 +238,10 @@ public class HomepageController {
     @RequestMapping(value="/votar", method = RequestMethod.POST)
     public String votar(Model model, HttpSession session, @RequestParam("eleccion") String voto) {
         if (llavesRecibidas.get() == 3) {
-//            byte[] cifrado = votar(voto, secretKey);
-//
-//            session.setAttribute("cifrado", cifrado);
-//            secretKey = null;
+            byte[] cifrado = votar(voto, secretKey);
+
+            session.setAttribute("cifrado", cifrado);
+            secretKey = null;
 
             model.addAttribute("paso", 3);
             return "index";
@@ -342,18 +341,18 @@ public class HomepageController {
 
     @RequestMapping(value="/recuento", method = RequestMethod.POST)
     public String iniciarRecuento(Model model, HttpSession session, @RequestParam("password") String password) {
-//        byte[] salt = leerSalt();
-//        secretKey = cifradorAES.generarLlave(salt, password);
-//
-//        byte[] votoOriginal = (byte[]) session.getAttribute("cifrado");
-//        enviaMensaje(votoOriginal, 0, 1);
-//
-//        while (votosFinales.size() < 4) {
-//            if (detectaAlteracion.getEstado()) {
-//                return "alteracion";
-//            }
-//        }
-//
+        byte[] salt = leerSalt();
+        secretKey = cifradorAES.generarLlave(salt, password);
+
+        byte[] votoOriginal = (byte[]) session.getAttribute("cifrado");
+        enviaMensaje(votoOriginal, 0, 1);
+
+        while (votosFinales.size() < 4) {
+            if (detectaAlteracion.getEstado()) {
+                return "alteracion";
+            }
+        }
+
         int votosSi=0;
         for (String voto: votosFinales) {
             if (voto.equals("Si")) {
