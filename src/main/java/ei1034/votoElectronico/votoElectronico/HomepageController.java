@@ -248,7 +248,7 @@ public class HomepageController {
             byte[] cifrado = votar(voto, secretKey);
 
             session.setAttribute("cifrado", cifrado);
-            secretKey = null;
+//            secretKey = null;
 
             model.addAttribute("paso", 3);
             return "index";
@@ -348,8 +348,8 @@ public class HomepageController {
 
     @RequestMapping(value="/recuento", method = RequestMethod.POST)
     public String iniciarRecuento(Model model, HttpSession session, @RequestParam("password") String password) {
-        byte[] salt = leerSalt();
-        secretKey = cifradorAES.generarLlave(salt, password);
+//        byte[] salt = leerSalt();
+//        secretKey = cifradorAES.generarLlave(salt, password);
 
         byte[] votoOriginal = (byte[]) session.getAttribute("cifrado");
         enviaMensaje(votoOriginal, 0, 1);
