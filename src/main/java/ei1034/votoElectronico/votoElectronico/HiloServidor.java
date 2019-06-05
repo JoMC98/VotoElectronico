@@ -113,7 +113,7 @@ class HiloServidor implements Runnable {
                         break;
                     //Primer envio todos a Alice (Primera fase)
                     case 1:
-                        if (privateKey == null)
+                        if (privateKey == null && HomepageController.getSecretKey() != null)
                             privateKey = cifradorAES.leerYdesencriptarCifrado();
                         myDataSocket.sendLongitud("LONGITUD RECIBIDA");
                         m = myDataSocket.receiveMessage(longitud);
@@ -137,7 +137,7 @@ class HiloServidor implements Runnable {
                         break;
                     //Segunda fase de envios
                     case 2:
-                        if (privateKey == null)
+                        if (privateKey == null && HomepageController.getSecretKey() != null)
                             privateKey = cifradorAES.leerYdesencriptarCifrado();
                         myDataSocket.sendLongitud("LONGITUD RECIBIDA");
                         m = myDataSocket.receiveMessage(longitud);

@@ -89,8 +89,7 @@ public class HomepageController {
                 List<byte[]> mensajesFase1Unsafe = new ArrayList<byte[]>();
                 List<byte[]> mensajesFase1 = Collections.synchronizedList(mensajesFase1Unsafe);
 
-                ArrayList<String> listaIps = new ArrayList<String>();
-
+                listaIps = new ArrayList<String>();
                 try {
                     Scanner sc = new Scanner(new File(ficheroIps));
                     while(sc.hasNextLine()) {
@@ -99,8 +98,6 @@ public class HomepageController {
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
-                String myIp = null;
-
 
                 try
                 {
@@ -174,30 +171,6 @@ public class HomepageController {
     }
 
     private static void crearSockets() {
-        listaIps = new ArrayList<String>();
-        try {
-            Scanner sc = new Scanner(new File(ficheroIps));
-            while(sc.hasNextLine()) {
-                listaIps.add(sc.nextLine());
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        try
-        {
-            myIp = InetAddress.getLocalHost().getHostAddress();
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        for (int i=0; i<listaIps.size(); i++) {
-            if (listaIps.get(i).equals(myIp)) {
-                myPosition = i;
-            }
-        }
         for (int i=0; i<listaIps.size(); i++) {
             try {
                 AuxiliarCliente socket = new AuxiliarCliente(listaIps.get(i), 3000);
@@ -248,7 +221,7 @@ public class HomepageController {
             byte[] cifrado = votar(voto, secretKey);
 
             session.setAttribute("cifrado", cifrado);
-//            secretKey = null;
+            secretKey = null;
 
             model.addAttribute("paso", 3);
             return "index";
@@ -348,8 +321,8 @@ public class HomepageController {
 
     @RequestMapping(value="/recuento", method = RequestMethod.POST)
     public String iniciarRecuento(Model model, HttpSession session, @RequestParam("password") String password) {
-//        byte[] salt = leerSalt();
-//        secretKey = cifradorAES.generarLlave(salt, password);
+        byte[] salt = leerSalt();
+        secretKey = cifradorAES.generarLlave(salt, password);
 
         byte[] votoOriginal = (byte[]) session.getAttribute("cifrado");
         enviaMensaje(votoOriginal, 0, 1);
