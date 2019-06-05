@@ -1,4 +1,4 @@
-package ei1034.votoElectronico.votoElectronico;
+package ei1034.votoElectronico.alteracion;
 
 public class DetectaAlteracion {
     private boolean hayAlteracion;

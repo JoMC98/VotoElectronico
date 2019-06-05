@@ -1,5 +1,11 @@
-package ei1034.votoElectronico.votoElectronico;
+package ei1034.votoElectronico.controller;
 
+import ei1034.votoElectronico.alteracion.DetectaAlteracion;
+import ei1034.votoElectronico.cifrador.AES;
+import ei1034.votoElectronico.cifrador.RSA;
+import ei1034.votoElectronico.sockets.AuxiliarCliente;
+import ei1034.votoElectronico.sockets.HiloServidor;
+import ei1034.votoElectronico.sockets.MyStreamSocket;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,6 +59,8 @@ public class HomepageController {
 
     private static boolean serverSocketCreated = false;
 
+    private static byte[] cifrado;
+
     @RequestMapping("/")
     public String index(Model model) {
         if (!serverSocketCreated) {
@@ -70,7 +78,6 @@ public class HomepageController {
         model.addAttribute("paso", 1);
         return "index";
     }
-
 
     class HiloActivarServidor implements Runnable {
         DetectaAlteracion detectaAlteracion;
@@ -218,9 +225,8 @@ public class HomepageController {
     @RequestMapping(value="/votar", method = RequestMethod.POST)
     public String votar(Model model, HttpSession session, @RequestParam("eleccion") String voto) {
         if (llavesRecibidas.get() == 3) {
-            byte[] cifrado = votar(voto, secretKey);
+            cifrado = votar(voto, secretKey);
 
-            session.setAttribute("cifrado", cifrado);
             secretKey = null;
 
             model.addAttribute("paso", 3);
@@ -324,8 +330,8 @@ public class HomepageController {
         byte[] salt = leerSalt();
         secretKey = cifradorAES.generarLlave(salt, password);
 
-        byte[] votoOriginal = (byte[]) session.getAttribute("cifrado");
-        enviaMensaje(votoOriginal, 0, 1);
+        enviaMensaje(cifrado, 0, 1);
+        cifrado = null;
 
         while (votosFinales.size() < 4) {
             if (detectaAlteracion.getEstado()) {
@@ -366,7 +372,6 @@ public class HomepageController {
 
     private static void enviaMensaje(byte[] m, int dest, int indice) {
         try {
-            crearSockets();
             System.out.println("ENVIA A " + dest);
             sockets[dest].enviaMensaje(m, indice);
         } catch (SocketException e) {

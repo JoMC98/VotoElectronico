@@ -1,4 +1,6 @@
-package ei1034.votoElectronico.votoElectronico;
+package ei1034.votoElectronico.cifrador;
+
+import ei1034.votoElectronico.controller.HomepageController;
 
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
@@ -10,12 +12,10 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Scanner;
 
 public class AES {
     Cipher cifrador;
     private static String dirBasePrivada = "src/main/resources/static/claves/llavePrivada.dat";
-    private static String dirBaseSalt = "src/main/resources/static/claves/salt.dat";
     private static String dirBaseCadenas = "src/main/resources/static/cadenas/r";
 
     public AES() {
@@ -73,7 +73,7 @@ public class AES {
         }
     }
 
-    public PrivateKey leerYdesencriptarCifrado(){
+    public PrivateKey leerYdesencriptarLlave(){
         SecretKey key = HomepageController.getSecretKey();
         byte[] bytes = null;
         try {

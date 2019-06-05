@@ -1,26 +1,22 @@
-package ei1034.votoElectronico.votoElectronico;
+package ei1034.votoElectronico.alteracion;
 
-import javax.crypto.*;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
+import ei1034.votoElectronico.cifrador.RSA;
+import ei1034.votoElectronico.sockets.AuxiliarCliente;
+
 import java.io.*;
 import java.math.BigInteger;
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class PruebaAlteracion {
-    private static ArrayList<String> listaIps;
-
     private static SecureRandom sr = new SecureRandom();
 
     private static String ficheroIps = "src/main/resources/static/ips.txt";
     private static String dirBasePublica = "src/main/resources/static/claves/llavePublica";
 
-    public static void main(String[] args) throws UnsupportedEncodingException {
+    /*Se intenta manipular la votación introduciendo otro voto*/
+    public static void main(String[] args) {
         RSA cifrador = new RSA();
 
         PublicKey publicKeyA = cifrador.cargarClavePublica(dirBasePublica + "A.dat");

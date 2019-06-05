@@ -1,4 +1,6 @@
-package ei1034.votoElectronico.votoElectronico;
+package ei1034.votoElectronico.sockets;
+
+import ei1034.votoElectronico.sockets.MyStreamSocket;
 
 import java.net.*;
 import java.io.*;
@@ -16,13 +18,7 @@ public class AuxiliarCliente {
 	   
    } // end constructor
 
-   public void fin( ) throws IOException {
-	   String m = "-1";
-	   mySocket.sendLongitud(m);
-	   mySocket.close();	   
-   }
-
-    public void enviaAviso() throws IOException {
+    public void enviaAvisoAlteracion() throws IOException {
         String cadena = "6#0";
         mySocket.sendLongitud(cadena);
         mySocket.close();
@@ -35,7 +31,7 @@ public class AuxiliarCliente {
        if (res.equals("LONGITUD RECIBIDA")) {
            mySocket.sendMessage(m);
        }
-   }
+    }
 
     public void enviaLlave(byte[] m, String letra)
             throws IOException {

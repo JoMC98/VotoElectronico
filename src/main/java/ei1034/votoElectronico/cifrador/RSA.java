@@ -1,4 +1,4 @@
-package ei1034.votoElectronico.votoElectronico;
+package ei1034.votoElectronico.cifrador;
 
 import javax.crypto.*;
 import java.io.FileInputStream;
@@ -13,7 +13,6 @@ import java.util.ArrayList;
 public class RSA {
     Cipher cifrador;
     Signature sign;
-
 
     public RSA() {
         try {

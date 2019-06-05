@@ -1,4 +1,4 @@
-package ei1034.votoElectronico.votoElectronico;
+package ei1034.votoElectronico.sockets;
 
 import java.net.*;
 import java.io.*;
@@ -58,7 +58,7 @@ public class MyStreamSocket extends Socket {
       byte[] message = new byte[l];
       input.read(message);
       return message;
-   } //end receiveMessage
+   }
 
    public void close( )
 		throws IOException {	
@@ -69,4 +69,4 @@ public class MyStreamSocket extends Socket {
    public String toString() {
       return acceptorHost.toString();
    }
-} //end class
+}

@@ -1,4 +1,9 @@
-package ei1034.votoElectronico.votoElectronico;
+package ei1034.votoElectronico.sockets;
+
+import ei1034.votoElectronico.cifrador.AES;
+import ei1034.votoElectronico.cifrador.RSA;
+import ei1034.votoElectronico.alteracion.DetectaAlteracion;
+import ei1034.votoElectronico.controller.HomepageController;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -14,7 +19,7 @@ import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-class HiloServidor implements Runnable {
+public class HiloServidor implements Runnable {
     MyStreamSocket myDataSocket;
     private static String dirBasePublica = "src/main/resources/static/claves/llavePublica";
     private static String dirBaseEncriptados = "src/main/resources/static/encriptados/e";
@@ -45,7 +50,7 @@ class HiloServidor implements Runnable {
     private static AtomicInteger llavesRecibidas;
 
 
-   HiloServidor(MyStreamSocket myDataSocket, List<AuxiliarCliente> sockets, List<byte[]> mensajesFase1,
+   public HiloServidor(MyStreamSocket myDataSocket, List<AuxiliarCliente> sockets, List<byte[]> mensajesFase1,
                 DetectaAlteracion detectaAlteracion, List<String> votosFinales, AtomicInteger llavesRecibidas) {
        this.myDataSocket = myDataSocket;
        this.sockets = sockets;
@@ -83,17 +88,14 @@ class HiloServidor implements Runnable {
    }
 
    public void run( ) {
-       boolean done = false;
        byte[] m;
        String l;
        String[] v;
        int op;
        int longitud;
 
-
        try {
-            while (!done) {
-                // Recibe una peticion del cliente
+            while (true) {
         	    // Extrae la operación y los argumentos
                 l = myDataSocket.receiveLongitud();
                 v = l.split("#");
@@ -114,12 +116,15 @@ class HiloServidor implements Runnable {
                     //Primer envio todos a Alice (Primera fase)
                     case 1:
                         if (privateKey == null && HomepageController.getSecretKey() != null)
-                            privateKey = cifradorAES.leerYdesencriptarCifrado();
+                            privateKey = cifradorAES.leerYdesencriptarLlave();
                         myDataSocket.sendLongitud("LONGITUD RECIBIDA");
                         m = myDataSocket.receiveMessage(longitud);
                         mensajesFase1.add(m);
 
                         if (mensajesFase1.size() == 4) {
+                            if (privateKey == null) {
+                                enviaAviso();
+                            }
                             boolean correcto = false;
                             for (int i=0; i<4; i++) {
                                 if (desencriptar(i, 1, -1))
@@ -138,12 +143,15 @@ class HiloServidor implements Runnable {
                     //Segunda fase de envios
                     case 2:
                         if (privateKey == null && HomepageController.getSecretKey() != null)
-                            privateKey = cifradorAES.leerYdesencriptarCifrado();
+                            privateKey = cifradorAES.leerYdesencriptarLlave();
                         myDataSocket.sendLongitud("LONGITUD RECIBIDA");
                         m = myDataSocket.receiveMessage(longitud);
                         mensajesFase2.add(m);
 
                         if (mensajesFase2.size() == 4) {
+                            if (privateKey == null) {
+                                enviaAviso();
+                            }
                             boolean correcto = false;
                             for (int i=0; i<4; i++) {
                                 if (desencriptar(i, 2, -1))
@@ -271,9 +279,9 @@ class HiloServidor implements Runnable {
                             }
                         }
                         break;
+                    //Alteracion
                     case 6:
                         detectaAlteracion.nuevaAlteracion();
-//                        myDataSocket.close();
                 }
             }
        }
@@ -312,7 +320,7 @@ class HiloServidor implements Runnable {
         try {
             detectaAlteracion.nuevaAlteracion();
             for (int i=0; i<4; i++) {
-                sockets.get(i).enviaAviso();
+                sockets.get(i).enviaAvisoAlteracion();
             }
         } catch (SocketException e) {
             e.printStackTrace();
@@ -409,17 +417,6 @@ class HiloServidor implements Runnable {
             votosFinalesProvisional.add(votoFinal);
             return comprobarCadenas(cadenaExtraida.toByteArray(), desencriptado);
         }
-    }
-
-    private static void almacenarFichero(byte[] bytes, String fichero) {
-        try {
-            FileOutputStream fos = new FileOutputStream(fichero);
-            fos.write(bytes);
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
     private static byte[] leerFichero(String fichero) {
